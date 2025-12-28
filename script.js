@@ -63,6 +63,7 @@ const questions = [
 let index = 0;
 let answers = Array(questions.length).fill(null);
 let reviewMode = false;
+let shuffledQuestions = [];
 /* ========= ELEMENTS ========= */
 
 const qText = document.getElementById("questionText");
@@ -93,7 +94,7 @@ function select(isCorrect, btn) {
 
   answers[index] = isCorrect;
 
-  const q = questions[index];
+  const q = shuffledQuestions[index];
 
   [...optionsDiv.children].forEach(b => {
     b.disabled = true;
@@ -124,15 +125,13 @@ function select(isCorrect, btn) {
 
   nextBtn.style.display = "inline-block";
 }
-/* ========= QUIZ ========= */
-  
 function startQuiz() {
   index = 0;
   answers = Array(questions.length).fill(null);
   reviewMode = false;
 
-  // ⭐ خلط الأسئلة كل مرة
-  questions.sort(() => Math.random() - 0.5);
+  // ✅ اعمل نسخة بدل ما تغيّر الأصل
+  shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
 
   document.getElementById("result").classList.remove("show");
   document.getElementById("home").style.display = "none";
@@ -144,14 +143,14 @@ function loadQuestion() {
   optionsDiv.innerHTML = "";
   nextBtn.style.display = "none";
 
-  const q = questions[index];
+  const q = shuffledQuestions[index];
   qText.innerText = q.q;
   counter.innerText = `Question ${index + 1} / ${questions.length}`;
   progress.style.width = ((index + 1) / questions.length) * 100 + "%";
 
   if (q.type === "tf") {
-    createOption("True", true);
-    createOption("False", false);
+    createOption("True", q.a === true);
+createOption("False", q.a === false);
   } else {
     const options = q.options.map((text, i) => ({
   text,
@@ -226,12 +225,6 @@ function renderQuestionsList() {
     } else {
       b.className = "q-wrong";
     }
-
-    // ⭐ السؤال الحالي
-    if (i === index) {
-      b.style.outline = "3px solid #3498db";
-    }
-
     b.onclick = () => {
       index = i;
       loadQuestion();
